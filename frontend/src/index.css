@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 dark:bg-dark-950 dark:text-slate-100 selection:bg-brand-500 selection:text-white;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar style */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-dark-900;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-dark-700 rounded-full hover:bg-slate-400 dark:hover:bg-dark-600 transition-colors;
+  }
+
+  /* Cyberpunk glows and card styles */
+  .cyber-card {
+    @apply relative overflow-hidden bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 rounded-xl transition-all duration-300;
+  }
+  
+  .cyber-card:hover {
+    @apply border-brand-400 dark:border-brand-500 shadow-[0_0_15px_rgba(79,86,241,0.15)];
+  }
+
+  .glow-text-blue {
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+  }
+
+  .glow-text-purple {
+    text-shadow: 0 0 10px rgba(184, 0, 255, 0.4);
+  }
+}
+
+/* Custom micro-animations */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.dark .glass {
+  background: rgba(26, 27, 30, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Core lightweight page/UI transitions */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes toast-in {
+  0% { transform: translateY(1rem) scale(0.95); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

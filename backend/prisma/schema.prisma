@@ -1,0 +1,88 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                    Int              @id @default(autoincrement())
+  email                 String?          @unique
+  passwordHash          String?          // Nullable for GitHub OAuth-only accounts
+  name                  String?
+  avatarUrl             String?
+  githubId              String?          @unique // Linked GitHub account ID
+  githubUsername        String?          @unique // Linked GitHub username
+  githubAccessToken     String?          // Encrypted OAuth access token
+  githubBio             String?          @db.Text
+  githubReposCount      Int              @default(0)
+  githubFollowers       Int              @default(0)
+  githubFollowing       Int              @default(0)
+  githubCompany         String?
+  githubLocation        String?
+  githubBlog            String?
+  githubTwitter         String?
+  passwordResetToken    String?          @unique
+  passwordResetExpires  DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  reports               AnalysisReport[] // Saved and recent reports
+  refreshTokens         RefreshToken[]
+  userPreferences       UserPreference?
+
+  @@index([email])
+  @@index([githubUsername])
+}
+
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique @db.VarChar(512) // SHA-256 hash of the refresh token
+  jti       String    @unique // Unique JWT Token ID
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?   @db.VarChar(512)
+  ipAddress String?   @db.VarChar(255)
+  expiresAt DateTime
+  isUsed    Boolean   @default(false)
+  revokedAt DateTime? // Nullable, set when explicitly revoked (e.g., logout)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([token])
+  @@index([jti])
+}
+
+model UserPreference {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme     String  @default("dark") // "light" | "dark"
+  sendAlerts Boolean @default(true)
+}
+
+model AnalysisReport {
+  id                     String   @id @default(uuid())
+  userId                 Int?     // Nullable to allow guest searches
+  user                   User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetGithubUsername   String
+  developerScore         Int
+  scoreBreakdown         Json     // Detail scores: Repo Quality, Docs, Diversity, Activity, OpenSource, Portfolio
+  resumeReadinessStars   Int      // 1 to 5 stars
+  resumeBreakdown        Json     // Strengths, Needs Improvement, Action Items
+  aiSummary              String   @db.Text
+  strengths              Json     // Array of strengths
+  weaknesses             Json     // Array of weaknesses
+  suggestions            Json     // Detailed actionable improvement suggestions
+  reposAnalyzed          Json     // Summary list of top repos analyzed
+  languageData           Json     // Primary languages and their percentages
+  rawMetadataCache       Json     // Cache of raw GitHub API metrics (to avoid re-fetching)
+  isSaved                Boolean  @default(false) // Distinguishes saved reports from search history
+  createdAt              DateTime @default(now())
+
+  @@index([userId])
+  @@index([targetGithubUsername])
+  @@index([createdAt])
+}
