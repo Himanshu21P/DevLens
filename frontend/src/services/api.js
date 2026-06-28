@@ -2,11 +2,11 @@ import axios from 'axios';
 
 // Create a configured Axios instance
 const api = axios.create({
-  baseURL: '', // Empty because Vite proxy maps /api to localhost:5000
+  baseURL: 'https://devlens-api-iw30.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Crucial for sending secure HttpOnly cookies (refresh tokens)
+  withCredentials: true,
 });
 
 let isRefreshing = false;
@@ -54,7 +54,7 @@ api.interceptors.response.use(
 
       try {
         // Attempt to rotate tokens via refresh endpoint
-        const response = await axios.post('/api/v1/auth/refresh', {}, { withCredentials: true });
+        const response = await api.post('/api/v1/auth/refresh', {});
         const { accessToken } = response.data.data;
 
         // Set the new token on the default headers and the failed request
@@ -71,10 +71,10 @@ api.interceptors.response.use(
         // Rotation failed (token revoked or expired). Clear queue and reject
         processQueue(refreshError, null);
         isRefreshing = false;
-        
+
         // Dispatch a custom event to notify AuthContext to log out the user
         window.dispatchEvent(new Event('auth:session_expired'));
-        
+
         return Promise.reject(refreshError);
       }
     }
